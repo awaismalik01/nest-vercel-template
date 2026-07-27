@@ -1,0 +1,78 @@
+name: Vercel Dev Deployment
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+  checks: write
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+  # Uncomment and configure when you have a database migration setup:
+  # Database:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: <your-org>/github-actions/secure-flyway-migration@v1
+  #       with:
+  #         infisical-method: "oidc"
+  #         infisical-identity-id: ${{ secrets.INFISICAL_MACHINE_ID }}
+  #         infisical-project-slug: ${{ secrets.INFISICAL_DB_FLYWAY_SLUG }}
+  #         infisical-secret-path: ${{ secrets.INFISICAL_DB_SECRET_PATH }}
+  #         infisical-env-slug: "dev"
+  #         migration-path: "./db-migrations"
+
+  Deploy-Preview:
+    needs: [Build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Option 1: Using a custom composite action with Infisical secrets
+      # - uses: <your-org>/github-actions/nest-vercel-deploy@v1
+      #   with:
+      #     vercel_token: ${{ secrets.VERCEL_TOKEN }}
+      #     vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
+      #     vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+      #     target: preview
+      #     infisical_method: "oidc"
+      #     infisical_identity_id: ${{ secrets.INFISICAL_MACHINE_ID }}
+      #     infisical_project_slug: ${{ secrets.INFISICAL_PROJECT_SLUG }}
+      #     infisical_env_slug: "dev"
+
+      # Option 2: Direct Vercel CLI deployment
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to Vercel (Preview)
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
