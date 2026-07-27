@@ -2,9 +2,9 @@ name: Vercel Dev Deployment
 
 on:
   workflow_dispatch:
-  push:
-    branches-ignore:
-      - main
+  # push:
+  #   branches-ignore:
+  #     - main
 
 permissions:
   id-token: write
