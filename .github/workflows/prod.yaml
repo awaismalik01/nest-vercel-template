@@ -1,9 +1,9 @@
-name: Vercel Dev Deployment
+name: Vercel Production Deployment
 
 on:
   workflow_dispatch:
   push:
-    branches-ignore:
+    branches:
       - main
 
 permissions:
@@ -38,10 +38,10 @@ jobs:
           infisical-identity-id: ${{ secrets.INFISICAL_MACHINE_ID }}
           infisical-project-slug: ${{ secrets.INFISICAL_NEON_DB_FLYWAY_SLUG }}
           infisical-secret-path: ${{ secrets.INFISICAL_NEON_SECRET_PATH }}
-          infisical-env-slug: "dev"
+          infisical-env-slug: "prod"
           migration-path: "./db-migrations"
 
-  Deploy-Preview:
+  Deploy-Production:
     needs: [Build, Database]
     runs-on: ubuntu-latest
 
@@ -54,8 +54,8 @@ jobs:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
-          target: preview
+          target: production
           infisical_method: "oidc"
           infisical_identity_id: ${{ secrets.INFISICAL_MACHINE_ID }}
           infisical_project_slug: ${{ secrets.INFISICAL_PROJECT_SLUG }}
-          infisical_env_slug: "staging"
+          infisical_env_slug: "prod"

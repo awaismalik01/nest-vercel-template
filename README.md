@@ -25,12 +25,30 @@ cd my-service
 # 2. Install dependencies
 npm install
 
-# 3. Set up environment
-cp .env.example .env
-# Edit .env with your database credentials and JWT secret
+# 3. Set up environment (via Infisical)
+infisical export --env=dev --format dotenv > .env
 
 # 4. Start development
 npm run start:dev
+```
+
+### Setting up Infisical
+
+```bash
+# Install the CLI
+npm install -g @infisical/cli
+
+# Login to your Infisical account
+infisical login
+
+# Link this repo to your Infisical project (run once — creates .infisical.json)
+infisical init
+```
+
+After that, pull your `.env` anytime with:
+
+```bash
+infisical export --env=dev --format dotenv > .env
 ```
 
 The API will be available at `http://localhost:8080/api/actuator` (health check).
@@ -129,12 +147,16 @@ adminRoute() { ... }
 
 ## Deployment (Vercel)
 
-The project is configured for Vercel deployment via `@vercel/node`:
+The project is configured for Vercel deployment via `@vercel/node`. The `vercel.json` routes all traffic to `dist/main.js`.
 
-1. Build: `npm run build`
-2. Deploy: The `vercel.json` routes all traffic to `dist/main.js`
+### CI/CD Pipelines
 
-CI/CD workflow template is included at `.github/workflows/dev.yaml`.
+| Workflow | Trigger | Vercel target | Infisical env |
+|----------|---------|---------------|---------------|
+| `.github/workflows/dev.yaml` | Push to any branch except `main` | `preview` | `staging` |
+| `.github/workflows/prod.yaml` | Push to `main` | `production` | `prod` |
+
+Both pipelines: Build → Run Flyway DB migrations → Deploy to Vercel. Secrets are fetched from Infisical via OIDC.
 
 ---
 

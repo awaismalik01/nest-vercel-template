@@ -110,7 +110,34 @@ All repositories extend `BaseRepository<T>` (`src/config/base.repository.ts`). I
 
 ## Deployment (Vercel)
 
-`vercel.json` at root: builds `dist/main.js` with `@vercel/node`, routes all traffic to it, and redirects `/` → `/api/actuator`. Run `nest build` before deploying. `git.deploymentEnabled: false` means deploys are triggered by CI, not Vercel's git integration.
+`vercel.json` at root: builds `dist/main.js` with `@vercel/node`, routes all traffic to it, and redirects `/` → `/api/actuator`. `git.deploymentEnabled: false` means deploys are triggered by CI, not Vercel's git integration.
+
+### CI/CD Pipelines
+
+Two GitHub Actions workflows handle deployment:
+
+| Workflow | Trigger | Vercel target | Infisical env |
+|----------|---------|---------------|---------------|
+| `.github/workflows/dev.yaml` | Push to any branch except `main` | `preview` | `staging` |
+| `.github/workflows/prod.yaml` | Push to `main` | `production` | `prod` |
+
+Both workflows run three jobs in order:
+
+1. **Build** — checkout, setup Node 24, install dependencies
+2. **Database** — run Flyway migrations via `awaismalik01/github-actions/secure-flyway-migration@v1`
+3. **Deploy** — deploy to Vercel via `awaismalik01/github-actions/nest-vercel-deploy@v1`
+
+Secrets are fetched from Infisical using OIDC authentication. Required GitHub repository secrets:
+
+| Secret | Purpose |
+|--------|---------|
+| `INFISICAL_MACHINE_ID` | OIDC identity ID for Infisical authentication |
+| `INFISICAL_NEON_DB_FLYWAY_SLUG` | Infisical project slug for Neon DB migration secrets |
+| `INFISICAL_NEON_SECRET_PATH` | Secret path within the Infisical project for DB credentials |
+| `INFISICAL_PROJECT_SLUG` | Infisical project slug for app environment variables |
+| `VERCEL_TOKEN` | Vercel deployment token |
+| `VERCEL_PROJECT_ID` | Vercel project ID |
+| `VERCEL_ORG_ID` | Vercel organization/team ID |
 
 ---
 
