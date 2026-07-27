@@ -2,9 +2,9 @@
   "name": "nestjs-service-template",
   "version": "1.0.0",
   "description": "NestJS REST API template with TypeORM, JWT auth guard, Swagger, and Vercel deployment",
-  "author": "",
+  "author": "Awais Malik",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
